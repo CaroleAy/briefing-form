@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Briefing Form for Landing Page</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #f0efeb;
+    color: #272726;
+    font-size: 14px;
+  }
+  h1, h2, h3 { font-weight: 700; }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; font-size: 0.85rem; }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    background: white;
+    border-right: 1px solid #e4e2dd;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  .canvas-wrap { flex: 1; padding: 24px 32px; max-width: 1500px; }
+
+  .brand { margin-bottom: 18px; }
+  .brand h1 { font-size: 1.05rem; color: #db001c; letter-spacing: -0.2px; }
+  .brand p { font-size: 0.78rem; color: #686867; margin-top: 2px; }
+
+  details.info-box {
+    background: #f8f8f6;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 0.78rem;
+    color: #55554f;
+  }
+  details.info-box summary { cursor: pointer; font-weight: 600; color: #272726; }
+  details.info-box ul { margin: 8px 0 0 16px; }
+  details.info-box li { margin-bottom: 4px; line-height: 1.4; }
+
+  /* ── Meta panel ── */
+  .meta-panel { margin-bottom: 20px; }
+  .meta-panel h2, .palette h2 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #9b9b9b;
+    margin-bottom: 10px;
+  }
+  .field { display: block; margin-bottom: 10px; }
+  .field span { display: block; font-size: 0.78rem; color: #55554f; margin-bottom: 4px; }
+  .field-counter { float: right; color: #b3b1ab; font-weight: 400; }
+  .field-counter.is-under { color: #b50024; }
+  .field input[type=text], .field input[type=date], .field textarea, .field select {
+    width: 100%;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 7px;
+    padding: 7px 9px;
+    font-size: 0.85rem;
+    color: #272726;
+    background: white;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: #db001c;
+  }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .field-info { font-size: 0.78rem; color: #9b9b9b; font-style: italic; line-height: 1.4; margin-bottom: 6px; }
+
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+
+  /* ── Palette ── */
+  .palette { margin-bottom: 20px; }
+  .palette-group { margin-bottom: 16px; }
+  .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tile {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px 8px;
+    background: white;
+    text-align: left;
+    transition: border-color .15s, background .15s;
+  }
+  .tile:hover { border-color: #db001c; background: #fdf0f2; }
+  .tile .tile-icon { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+  .tile .tile-label { font-size: 0.74rem; font-weight: 600; line-height: 1.25; display: block; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .toolbar h1 { font-size: 1.3rem; }
+  .toolbar .count { font-size: 0.8rem; color: #686867; margin-top: 2px; }
+  .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #eee;
+    color: #272726;
+  }
+  .btn-primary { background: #db001c; color: white; }
+  .btn-primary:hover { background: #85052e; }
+  .btn-ghost { background: white; border: 1.5px solid #e0e0e0; }
+  .btn-danger { background: white; border: 1.5px solid #db001c; color: #db001c; }
+  .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Workspace (editor canvas + live preview) ── */
+  .workspace { display: flex; gap: 20px; align-items: flex-start; }
+
+  /* ── Canvas / section cards ── */
+  .canvas { flex: 1 1 440px; display: flex; flex-direction: column; gap: 14px; }
+  .section-head { cursor: pointer; }
+
+  /* ── Live visual preview panel ── */
+  .live-preview-panel {
+    flex: 1 1 380px;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: white;
+    border: 1.5px solid #e6e4df;
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .live-preview-head { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #9b9b9b; font-weight: 700; margin-bottom: 12px; }
+
+  .vp-section { position: relative; margin-bottom: 20px; padding: 18px 6px 4px; border-radius: 12px; }
+  .vp-section:hover { background: #faf9f7; cursor: pointer; }
+  .vp-tag { position: absolute; top: 0; right: 0; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: #b3b1ab; font-weight: 700; background: #f8f8f6; padding: 2px 8px; border-radius: 6px; }
+  .vp-highlight { outline: 3px solid #db001c; outline-offset: 4px; }
+  .sec-highlight { outline: 3px solid #db001c; outline-offset: 2px; }
+  .vp-empty { color: #b3b1ab; font-style: italic; font-size: 0.8rem; }
+  .vp-empty-state { color: #b3b1ab; font-size: 0.85rem; text-align: center; padding: 40px 10px; }
+
+  .vp-ph { background: linear-gradient(135deg,#dcdad3,#c7c5be); border-radius: 10px; display: flex; align-items: flex-end; }
+  .vp-ph-tag { margin: 8px; font-size: 0.62rem; background: rgba(0,0,0,.5); color: #fff; padding: 2px 6px; border-radius: 4px; }
+  .vp-ph-tag-muted { background: rgba(0,0,0,.25); }
+
+  .vp-hero { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/7; background: linear-gradient(135deg,#dcdad3,#c7c5be); background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+  .vp-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.55), transparent 60%); }
+  .vp-hero-content { position: relative; z-index: 1; color: #fff; padding: 20px; }
+  .vp-hero-content h4 { font-size: 1.05rem; margin-bottom: 4px; }
+  .vp-hero-content p { font-size: 0.8rem; opacity: 0.9; max-width: 420px; }
+  .vp-btn { display: inline-block; margin-top: 8px; background: #b50024; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 6px 12px; border-radius: 6px; }
+
+  .vp-header-block { margin-bottom: 20px; }
+  .vp-header-block .vp-section { margin-bottom: 0; padding: 18px 6px 0; }
+  .vp-header-block .vp-section:last-child { padding-bottom: 4px; }
+  .vp-header-block .vp-stagehero { border-radius: 12px 12px 0 0; }
+  .vp-header-block .vp-submenu {
+    background: #fff;
+    border: 1.5px solid #e6e4df;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 10px 12px;
+  }
+  .vp-stagehero { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; background: linear-gradient(135deg,#dcdad3,#c7c5be); }
+  .vp-stagehero::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,.2); }
+  .vp-stagehero-imgtag { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 0.62rem; background: rgba(0,0,0,.5); color: #fff; padding: 2px 6px; border-radius: 4px; }
+  .vp-stagehero-imgtag-muted { background: rgba(0,0,0,.25); }
+  .vp-stagehero-title { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+  .vp-stagehero-title h1 { color: #fff; font-size: 1.7rem; font-weight: 600; text-shadow: 0 0 16px rgba(0,0,0,.7); }
+  .vp-stagehero-title .vp-empty { color: rgba(255,255,255,.65); font-size: 1rem; }
+  .vp-stagehero-location { position: absolute; bottom: 12px; right: 14px; z-index: 2; text-align: right; color: #fff; }
+  .vp-stagehero-location span { display: block; font-size: 0.7rem; opacity: 0.85; }
+  .vp-stagehero-location strong { display: block; font-size: 0.85rem; font-weight: 700; }
+
+  .vp-lead { color: #272726; font-size: 1.3rem; font-weight: 600; line-height: 1.3; letter-spacing: 0.01em; }
+  .vp-sponsor { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 14px; font-size: 0.75rem; color: #686867; }
+  .vp-sponsor img { height: 20px; object-fit: contain; }
+  .vp-lead-teaser-sub { font-size: 0.78rem; color: #686867; margin-top: 8px; }
+  .vp-lead-teaser-title { font-size: 1.05rem; font-weight: 600; color: #272726; margin-top: 2px; }
+
+  .vp-section-title-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  .vp-section-title-row h4 { font-size: 1.3rem; font-weight: 600; color: #272726; }
+  .vp-section-title-sub { color: #686867; font-size: 0.85rem; line-height: 1.4; margin-top: 6px; }
+  .vp-link { font-size: 0.78rem; color: #b50024; font-weight: 600; white-space: nowrap; }
+
+  .vp-two-col { display: flex; gap: 16px; align-items: center; }
+  .vp-two-col-text, .vp-two-col-img { flex: 1; min-width: 0; }
+  .vp-two-col-text h4 { font-size: 0.98rem; margin-bottom: 6px; }
+  .vp-two-col-text p { font-size: 0.85rem; color: #55554f; line-height: 1.5; }
+
+  .vp-block-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; }
+  .vp-slider { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .vp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .vp-card { position: relative; flex: 0 0 140px; width: 140px; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: linear-gradient(135deg,#dcdad3,#c7c5be); background-size: cover; background-position: center; }
+  .vp-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,.75)); }
+  .vp-card-content { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 1; color: #fff; }
+  .vp-card-title { font-size: 0.82rem; font-weight: 600; line-height: 1.2; }
+  .vp-card-sub { opacity: 0.85; font-size: 0.68rem; margin-top: 2px; }
+
+  .vp-gtc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .vp-gtc-head { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .vp-gtc-head h4 { font-size: 1.15rem; font-weight: 600; color: #272726; line-height: 1.2; }
+  .vp-gtc-card { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: linear-gradient(135deg,#dcdad3,#c7c5be); background-size: cover; background-position: center; }
+  .vp-gtc-card.is-wide { grid-column: span 2; aspect-ratio: auto; min-height: 100%; }
+  .vp-gtc-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.6)); }
+  .vp-gtc-card .vp-card-content { left: 12px; right: 12px; bottom: 12px; }
+  .vp-gtc-card .vp-card-title { font-size: 0.9rem; max-width: 220px; }
+
+  .vp-media-type { font-size: 0.72rem; color: #686867; margin-top: 6px; }
+  .vp-rec-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 14px; }
+  .vp-rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px 14px; }
+  .vp-rec-card { min-width: 0; }
+  .vp-rec-card h4 { font-size: 0.92rem; margin: 10px 0 5px; line-height: 1.25; }
+  .vp-rec-card p { font-size: 0.76rem; color: #686867; line-height: 1.5; margin-bottom: 8px; }
+  .vp-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .vp-video { position: relative; background-size: cover; background-position: center; }
+  .vp-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 48px; height: 34px; border-radius: 9px; background: #db001c; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+  .vp-caption { font-size: 0.78rem; color: #9b9b9b; margin-top: 4px; }
+
+  .vp-story h4 { font-size: 0.98rem; margin-bottom: 6px; }
+  .vp-story p { font-size: 0.85rem; color: #55554f; line-height: 1.5; margin-bottom: 8px; }
+
+
+  .vp-form-box { border: 1.5px dashed #d5d3cd; border-radius: 10px; padding: 14px; font-size: 0.85rem; color: #55554f; }
+  .vp-form-box p { margin-top: 4px; }
+
+  .vp-partners { display: flex; gap: 10px; flex-wrap: wrap; }
+  .vp-partner-logo { background: #eee; border-radius: 8px; width: 120px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 6px; font-size: 0.75rem; color: #9b9b9b; text-align: center; }
+  .vp-partner-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  .img-thumb { display: block; width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 6px; border: 1px solid #e0e0e0; }
+  .img-field-row { display: flex; gap: 6px; align-items: center; }
+  .img-field-row input[type=text] { flex: 1; }
+  .btn-upload { position: relative; border: 1.5px solid #e0e0e0; border-radius: 7px; padding: 7px 12px; font-size: 0.78rem; font-weight: 600; color: #55554f; background: white; white-space: nowrap; cursor: pointer; }
+  .btn-upload:hover { border-color: #db001c; color: #db001c; }
+  .btn-remove-img { border: 1.5px solid #f3c3cb; background: white; color: #db001c; border-radius: 7px; padding: 7px 10px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+  .btn-remove-img:hover { background: #fde8eb; }
+
+  .item-img-upload { width: 34px; height: 34px; flex-shrink: 0; border-radius: 6px; border: 1.5px dashed #d5d3cd; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: #f8f8f6; }
+  .item-img-upload img { width: 100%; height: 100%; object-fit: cover; }
+  .item-img-placeholder { font-size: 0.9rem; opacity: 0.5; }
+  .btn-remove-img-sm { border: none; background: #f8f8f6; color: #9b9b9b; border-radius: 6px; width: 22px; height: 22px; flex-shrink: 0; font-size: 0.68rem; }
+  .btn-remove-img-sm:hover { background: #fde8eb; color: #db001c; }
+
+  .vp-submenu { display: flex; gap: 8px; flex-wrap: wrap; }
+  .vp-pill { background: #f0efeb; padding: 5px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 600; }
+
+  @media (max-width: 1200px) {
+    .workspace { flex-direction: column; }
+    .live-preview-panel { position: static; max-height: none; width: 100%; }
+  }
+  .empty-hint {
+    border: 1.5px dashed #d5d3cd;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #9b9b9b;
+    font-size: 0.88rem;
+  }
+  .section-card {
+    background: white;
+    border: 1.5px solid #e6e4df;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #f8f8f6;
+    border-bottom: 1px solid #ececea;
+  }
+  .sec-icon { font-size: 1.05rem; }
+  .sec-label { font-weight: 700; font-size: 0.9rem; }
+  .sec-group {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 99px;
+  }
+  .sec-group-start { background: #e6e9fb; color: #3a4bb0; }
+  .sec-group-content { background: #fde8eb; color: #b20028; }
+  .sec-controls { margin-left: auto; display: flex; gap: 4px; }
+  .sec-controls button {
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    padding: 4px 8px;
+    color: #55554f;
+  }
+  .sec-controls button:hover { border-color: #db001c; color: #db001c; }
+  .sec-controls button:disabled { opacity: 0.35; cursor: default; }
+  .sec-controls .btn-delete { color: #db001c; border-color: #f3c3cb; }
+  .section-body { padding: 14px 16px 16px; }
+
+  /* ── List fields ── */
+  .list-field { margin-bottom: 10px; }
+  .list-items { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 8px; }
+  .list-item { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .list-item input, .list-item select {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+  .list-item input:focus, .list-item select:focus { outline: none; border-color: #db001c; }
+  .btn-remove-item {
+    border: none; background: #f8f8f6; color: #9b9b9b;
+    border-radius: 6px; width: 26px; height: 26px; flex-shrink: 0;
+  }
+  .btn-remove-item:hover { background: #fde8eb; color: #db001c; }
+  .btn-add-item {
+    border: 1.5px dashed #d5d3cd;
+    background: none;
+    border-radius: 7px;
+    padding: 5px 12px;
+    font-size: 0.76rem;
+    color: #686867;
+  }
+  .btn-add-item:hover { border-color: #db001c; color: #db001c; }
+
+  /* ── Preview ── */
+  .preview-wrap { max-width: 760px; }
+  .preview-toolbar { display: flex; gap: 8px; margin-bottom: 18px; }
+  .pv-doc {
+    background: white;
+    border-radius: 12px;
+    border: 1.5px solid #e6e4df;
+    padding: 32px 36px;
+  }
+  .pv-doc h1 { font-size: 1.4rem; margin-bottom: 16px; }
+  table.pv-meta { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  table.pv-meta th, table.pv-meta td { text-align: left; padding: 5px 8px; font-size: 0.82rem; }
+  table.pv-meta th { color: #9b9b9b; font-weight: 600; width: 140px; }
+  .pv-doc h2 { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; color: #9b9b9b; margin-bottom: 12px; border-top: 1px solid #eee; padding-top: 16px; }
+  .pv-block { padding: 16px 0; border-bottom: 1px solid #f0efeb; }
+  .pv-visual { border: 1px solid #ececea; border-radius: 12px; padding: 16px; background: #fafaf8; margin-bottom: 10px; }
+  .pv-visual .vp-section { margin-bottom: 0; padding-top: 14px; }
+  .pv-visual .vp-section:hover { background: none; cursor: default; }
+  .pv-visual .vp-tag { display: none; }
+  .pv-empty { color: #b3b1ab; font-style: italic; font-size: 0.82rem; }
+
+  [hidden] { display: none !important; }
+
+  @media print {
+    .no-print { display: none !important; }
+    .sidebar, .toolbar, .workspace { display: none !important; }
+    body { background: white; }
+    .pv-doc { border: none; padding: 0; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    .pv-block { break-inside: avoid; }
+  }
+
+  @media (max-width: 800px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Briefing Form Builder</h1>
+      <p>Assemble a landing page briefing, section by section.</p>
+    </div>
+
+    <details class="info-box">
+      <summary>How to use</summary>
+      <ul>
+        <li>Click a section tile below to add it to your page, in the order it should appear.</li>
+        <li>Fill in the fields shown for each section (titles, texts, links, SAM/image IDs).</li>
+        <li>Reorder or remove sections at any time with the ↑ ↓ and Delete controls.</li>
+        <li>Forms need a separate briefing — only describe the desired fields here.</li>
+        <li>When done, use Preview to review, then Save as PDF for the ticket.</li>
+      </ul>
+    </details>
+
+    <div class="meta-panel">
+      <h2>Briefing details</h2>
+      <div class="meta-grid">
+        <label class="field"><span>Golive date</span><input type="date" id="meta-golive"></label>
+        <label class="field"><span>Offline date</span><input type="date" id="meta-offline"></label>
+        <label class="field"><span>Additional languages</span><input type="text" id="meta-languages" placeholder="e.g. DE"></label>
+        <label class="field"><span>Markets</span><input type="text" id="meta-markets" placeholder="e.g. AT"></label>
+      </div>
+      <label class="field"><span>Redirect</span><input type="text" id="meta-redirect" placeholder="www.myswitzerland.com/..."></label>
+    </div>
+
+    <div class="palette">
+      <div class="palette-group">
+        <h2>Start section</h2>
+        <div class="tile-grid" id="palette-start"></div>
+      </div>
+      <div class="palette-group">
+        <h2>Content section</h2>
+        <div class="tile-grid" id="palette-content"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="canvas-wrap">
+    <div id="editor-view">
+      <div class="toolbar">
+        <div>
+          <h1>Your landing page</h1>
+          <div class="count" id="section-count">0 sections</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn btn-primary" id="btn-preview">Preview</button>
+          <button class="btn btn-danger" id="btn-clear">Clear all</button>
+        </div>
+      </div>
+      <div class="workspace">
+        <div class="canvas" id="canvas"></div>
+        <aside class="live-preview-panel">
+          <div class="live-preview-head">Live preview — click a section either side to jump to it</div>
+          <div id="live-preview"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="preview-view" class="preview-wrap" hidden>
+      <div class="preview-toolbar no-print">
+        <button class="btn btn-ghost" id="btn-back">← Back to editor</button>
+        <button class="btn btn-primary" id="btn-print">Save as PDF</button>
+      </div>
+      <div class="pv-doc" id="preview-doc"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const STORAGE_KEY = 'briefingFormState';
+
+  const LINK_LABEL_OPTIONS = ['Book now','Brochures','Campaign partner','Current Offers','download app','Get in touch','Keep me informed','Learn More','More Info','NoText','Of','Order','Participate','Presenting Partner','Profile Picture','Selection Presented By','Show All','Show example','Sponsor','Start','vacation suggestion','view offer','Watch Video','with the support of'];
+
+  const IMAGE_TEXT_TEASER_LABEL_OPTIONS = ['Book now','Get in touch','Learn More','Map Section Title','More Information','More Information about the destination','Order now','Profit now','Read external article','Read On','Read Project assignment','Read Strategy','Show All','Show example','Show full screen image','Show report','TdS Explorer','to the tips'];
+  const SECTION_TITLE_LABEL_OPTIONS = ['Show all','Learn more','Book now','More information'];
+
+  const sectionTypes = [
+    { key:'stage-title', group:'start', label:'Stage Title', icon:'🏷️', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'subtitle', label:'Subtitle / description', type:'textarea'},
+        {key:'buttonText', label:'Button text', type:'text'},
+        {key:'buttonLink', label:'Button link', type:'text'},
+        {key:'samId', label:'Background image', type:'image'}
+    ]},
+    { key:'stage-header', group:'start', label:'Stage Header', icon:'🖼️', fields:[
+        {key:'backgroundType', label:'Background', type:'select', options:['Image','Video'], default:'Image'},
+        {key:'samId', label:'Background image', type:'image', showIf: d => d.backgroundType !== 'Video', required:true},
+        {key:'youtubeUrl', label:'Background video (YouTube URL)', type:'text', showIf: d => d.backgroundType === 'Video', required:true},
+        {key:'title', label:'Title', type:'text', maxLength:40, required:true},
+        {key:'locationName', label:'Location name', type:'text', required:true}
+    ]},
+    { key:'sub-menu', group:'start', label:'Sub menu', icon:'📑', fields:[
+        {type:'info', text:'Menu items are generated automatically from the title of every Section Title added to this page.'}
+    ]},
+    { key:'leadtext', group:'content', label:'Leadtext', icon:'📝', fields:[
+        {key:'text', label:'Lead text (min. 250 characters, min. 3 lines)', type:'textarea', minLength:250, required:true},
+        {key:'sponsorSamId', label:'Presented by — logo (optional)', type:'image'},
+        {key:'sponsorLink', label:'Presented by — link (optional)', type:'text'},
+        {key:'teaserSamId', label:'Teaser image (optional)', type:'image'},
+        {key:'teaserSubtitle', label:'Teaser subtitle', type:'text', requiredIf: d => !!(d.teaserSamId || d.teaserSamIdDataUrl)},
+        {key:'teaserIntro', label:'Teaser intro', type:'text', requiredIf: d => !!(d.teaserSamId || d.teaserSamIdDataUrl)},
+        {key:'teaserLink', label:'Teaser link label', type:'select', options:LINK_LABEL_OPTIONS, allowEmpty:true, requiredIf: d => !!(d.teaserSamId || d.teaserSamIdDataUrl)},
+        {key:'teaserLinkUrl', label:'Teaser link URL', type:'text', requiredIf: d => !!(d.teaserSamId || d.teaserSamIdDataUrl)}
+    ]},
+    { key:'section-title', group:'content', label:'Section Title', icon:'🔖', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'text', label:'Subtitle text (optional)', type:'textarea'},
+        {key:'linkLabel', label:'Link label', type:'select', options:SECTION_TITLE_LABEL_OPTIONS, required:true},
+        {key:'linkUrl', label:'Link URL (optional)', type:'text'}
+    ]},
+    { key:'grid-teaser-slider', group:'content', label:'Grid Teaser Slider', icon:'🎠', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'items', label:'Teasers', type:'list', itemFields:[
+            {key:'samId', label:'Image', type:'image'}, {key:'title', label:'Title'}, {key:'link', label:'Link'}
+        ]}
+    ]},
+    { key:'image-gallery-video', group:'content', label:'Image - Gallery - Video', icon:'📷', fields:[
+        {key:'mediaType', label:'Type', type:'select', options:['Image','Gallery','Video']},
+        {key:'samId', label:'Image / upload reference', type:'image', showIf: d => !d.mediaType || d.mediaType === 'Image'},
+        {key:'images', label:'Gallery images', type:'list', showIf: d => d.mediaType === 'Gallery', itemFields:[
+            {key:'samId', label:'Image', type:'image'}
+        ]},
+        {key:'youtubeUrl', label:'Video (YouTube URL)', type:'text', showIf: d => d.mediaType === 'Video', required:true},
+        {key:'caption', label:'Caption (optional)', type:'text', showIf: d => d.mediaType !== 'Video'}
+    ]},
+    { key:'media-100', group:'content', label:'Media 100% width', icon:'🎞️', fields:[
+        {key:'samId', label:'Image / upload reference', type:'image'},
+        {key:'caption', label:'Caption (optional)', type:'text'}
+    ]},
+    { key:'recommendation-teaser', group:'content', label:'Recommendation Teaser Container', icon:'⭐', fields:[
+        {key:'title', label:'Title (optional)', type:'text'},
+        {key:'items', label:'Teasers', type:'list', itemFields:[
+            {key:'samId', label:'Image', type:'image'}, {key:'title', label:'Title'}, {key:'text', label:'Text'},
+            {key:'link', label:'Link URL ("Learn More")'}
+        ]}
+    ]},
+    { key:'hero-teaser', group:'content', label:'Hero Teaser Container', icon:'🦸', fields:[
+        {key:'samId', label:'Background image', type:'image'},
+        {key:'title', label:'Title', type:'text'},
+        {key:'text', label:'Text', type:'textarea'},
+        {key:'linkLabel', label:'Link label', type:'text'},
+        {key:'linkUrl', label:'Link URL', type:'text'}
+    ]},
+    { key:'image-text-teaser', group:'content', label:'Image Text Teaser', icon:'🖼️', fields:[
+        {key:'layout', label:'Layout', type:'select', options:['Image left','Image right']},
+        {key:'samId', label:'Image', type:'image'},
+        {key:'title', label:'Title', type:'text'},
+        {key:'text', label:'Text', type:'textarea'},
+        {key:'linkLabel', label:'Link label (optional)', type:'select', options:IMAGE_TEXT_TEASER_LABEL_OPTIONS, allowEmpty:true},
+        {key:'linkUrl', label:'Link URL (optional)', type:'text'}
+    ]},
+    { key:'story-text', group:'content', label:'Story Text', icon:'📖', fields:[
+        {key:'layout', label:'Layout', type:'select', options:['Image left','Image right']},
+        {key:'samId', label:'Image (optional)', type:'image'},
+        {key:'title', label:'Title', type:'text'},
+        {key:'text', label:'Text', type:'textarea'},
+        {key:'linkLabel', label:'Link label', type:'select', options:LINK_LABEL_OPTIONS, required:true},
+        {key:'linkUrl', label:'Link URL', type:'text', required:true}
+    ]},
+    { key:'grid-teaser-container', group:'content', label:'Grid Teaser Container', icon:'▦', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'linkLabel', label:'Link label (optional)', type:'text'},
+        {key:'linkUrl', label:'Link URL (optional)', type:'text'},
+        {key:'items', label:'Teasers', type:'list', itemFields:[
+            {key:'samId', label:'Image', type:'image'}, {key:'title', label:'Title'}, {key:'link', label:'Link'}
+        ]}
+    ]},
+    { key:'offer-teaser-slider', group:'content', label:'Offer Teaser Slider', icon:'🎟️', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'location', label:'Location', type:'text', required:true},
+        {type:'info', text:'Offers are not selected manually — they are loaded automatically based on the location entered.'}
+    ]},
+    { key:'event-teaser-grid', group:'content', label:'Event Teaser Grid', icon:'📅', fields:[
+        {key:'title', label:'Title', type:'text'},
+        {key:'filterBy', label:'Show events by', type:'select', options:['Location','Category']},
+        {key:'filterValue', label:'Location or category', type:'text', required:true},
+        {type:'info', text:'Events are not selected manually — they are loaded automatically based on the location or category entered.'}
+    ]},
+    { key:'form', group:'content', label:'Form', icon:'🧾', fields:[
+        {key:'note', label:'Describe desired form fields (separate briefing required)', type:'textarea'}
+    ]},
+    { key:'partner-logos', group:'content', label:'Partner Logos', icon:'🤝', fields:[
+        {key:'title', label:'Title (optional)', type:'text'},
+        {key:'items', label:'Logos', type:'list', itemFields:[
+            {key:'samId', label:'Logo', type:'image'}, {key:'link', label:'Link (optional)'}
+        ]}
+    ]}
+  ];
+
+  function uid() {
+    return (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2));
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.sections) && parsed.meta) {
+          parsed.sections = parsed.sections.map(s => s.type === 'intro-image' ? { ...s, type: 'leadtext' } : s)
+            .filter(s => s.type !== 'content-fry');
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return defaultState();
+  }
+
+  function defaultState() {
+    return {
+      meta: { golive:'', offline:'', languages:'', markets:'', redirect:'' },
+      sections: ['stage-header', 'sub-menu', 'leadtext'].map(makeSection)
+    };
+  }
+
+  let state = loadState();
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn('Could not persist to local storage (uploaded images may be too large to save between reloads).', e);
+    }
+    renderLivePreview();
+  }
+
+  const canvasEl = document.getElementById('canvas');
+  const countEl = document.getElementById('section-count');
+
+  function typeDef(key) { return sectionTypes.find(t => t.key === key); }
+
+  function isFieldRequired(section, field) {
+    return !!(field.required || (field.requiredIf && field.requiredIf(section.data)));
+  }
+
+  function lengthCounterHtml(val, field) {
+    const len = (val || '').length;
+    if (field.maxLength) return `<span class="field-counter">${len}/${field.maxLength}</span>`;
+    if (field.minLength) return `<span class="field-counter${len < field.minLength ? ' is-under' : ''}">${len}/${field.minLength} min</span>`;
+    return '';
+  }
+
+  function renderField(section, field) {
+    if (field.type === 'info') {
+      return `<p class="field-info">${esc(field.text)}</p>`;
+    }
+    let val = section.data[field.key];
+    const required = isFieldRequired(section, field);
+    if (field.type === 'textarea') {
+      const counter = lengthCounterHtml(val, field);
+      const maxAttr = field.maxLength ? ` maxlength="${field.maxLength}"` : '';
+      const minAttr = field.minLength ? ` minlength="${field.minLength}"` : '';
+      return `<label class="field"><span>${esc(field.label)}${required ? ' *' : ''}${counter}</span><textarea data-sec="${section.id}" data-field="${field.key}"${maxAttr}${minAttr}>${esc(val)}</textarea></label>`;
+    }
+    if (field.type === 'select') {
+      if (!field.allowEmpty && !field.options.includes(val)) { val = field.options[0]; section.data[field.key] = val; }
+      const emptyOpt = field.allowEmpty ? `<option value="" ${!val ? 'selected' : ''}>— none —</option>` : '';
+      const opts = field.options.map(o => `<option value="${esc(o)}" ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('');
+      return `<label class="field"><span>${esc(field.label)}${required ? ' *' : ''}</span><select data-sec="${section.id}" data-field="${field.key}">${emptyOpt}${opts}</select></label>`;
+    }
+    if (field.type === 'image') {
+      const dataUrl = section.data[field.key + 'DataUrl'];
+      return `<div class="field img-field">
+        <span>${esc(field.label)}${required ? ' *' : ''}</span>
+        ${dataUrl ? `<img class="img-thumb" src="${dataUrl}" alt="">` : ''}
+        <div class="img-field-row">
+          <input type="text" data-sec="${section.id}" data-field="${field.key}" value="${esc(val)}" placeholder="SAM ID (optional if uploading)">
+          <label class="btn-upload">Upload<input type="file" accept="image/*" hidden data-upload-sec="${section.id}" data-upload-field="${field.key}"></label>
+          ${dataUrl ? `<button type="button" class="btn-remove-img" data-action="remove-image" data-sec="${section.id}" data-field="${field.key}">Remove</button>` : ''}
+        </div>
+      </div>`;
+    }
+    if (field.type === 'list') {
+      const items = val || [];
+      const itemsHtml = items.map(item => {
+        const cellsHtml = field.itemFields.map(f => {
+          if (f.type === 'image') {
+            const dataUrl = item[f.key + 'DataUrl'];
+            return `<label class="item-img-upload" title="Upload image">${dataUrl ? `<img src="${dataUrl}" alt="">` : '<span class="item-img-placeholder">📷</span>'}<input type="file" accept="image/*" hidden data-upload-sec="${section.id}" data-upload-field="${field.key}" data-upload-item="${item.id}" data-upload-itemfield="${f.key}"></label>${dataUrl ? `<button type="button" class="btn-remove-img-sm" data-action="remove-image" data-sec="${section.id}" data-field="${field.key}" data-item="${item.id}" data-itemfield="${f.key}" title="Remove image">✕</button>` : ''}<input type="text" data-sec="${section.id}" data-field="${field.key}" data-item="${item.id}" data-itemfield="${f.key}" placeholder="${esc(f.label)} (SAM ID)" value="${esc(item[f.key])}">`;
+          }
+          return `<input type="text" data-sec="${section.id}" data-field="${field.key}" data-item="${item.id}" data-itemfield="${f.key}" placeholder="${esc(f.label)}" value="${esc(item[f.key])}">`;
+        }).join('');
+        return `<div class="list-item">${cellsHtml}<button type="button" class="btn-remove-item" data-action="remove-item" data-sec="${section.id}" data-field="${field.key}" data-item="${item.id}" title="Remove">✕</button></div>`;
+      }).join('');
+      return `<div class="field list-field">
+        <span>${esc(field.label)}</span>
+        <div class="list-items">${itemsHtml}</div>
+        <button type="button" class="btn-add-item" data-action="add-item" data-sec="${section.id}" data-field="${field.key}">+ Add item</button>
+      </div>`;
+    }
+    const counter = lengthCounterHtml(val, field);
+    const maxAttr = field.maxLength ? ` maxlength="${field.maxLength}"` : '';
+    const minAttr = field.minLength ? ` minlength="${field.minLength}"` : '';
+    return `<label class="field"><span>${esc(field.label)}${required ? ' *' : ''}${counter}</span><input type="text" data-sec="${section.id}" data-field="${field.key}" value="${esc(val)}"${maxAttr}${minAttr}></label>`;
+  }
+
+  function isHeaderMenuPair(idx) {
+    return state.sections[idx]?.type === 'stage-header' && state.sections[idx + 1]?.type === 'sub-menu';
+  }
+
+  function isMenuLockedUnderHeader(idx) {
+    return state.sections[idx]?.type === 'sub-menu' && state.sections[idx - 1]?.type === 'stage-header';
+  }
+
+  function buildSectionCardHTML(section, idx, total) {
+    const def = typeDef(section.type);
+    const fieldsHtml = section.collapsed ? '' : def.fields.filter(f => !f.showIf || f.showIf(section.data)).map(f => renderField(section, f)).join('');
+    const lockedMenu = isMenuLockedUnderHeader(idx);
+    const headerPair = isHeaderMenuPair(idx);
+    const disableUp = idx === 0 || lockedMenu;
+    const disableDown = idx === total - 1 || lockedMenu || (headerPair && idx + 1 === total - 1);
+    return `<div class="section-card" data-sec-id="${section.id}">
+      <div class="section-head">
+        <span class="sec-icon">${def.icon}</span>
+        <span class="sec-label">${esc(def.label)}</span>
+        <span class="sec-group sec-group-${def.group}">${def.group === 'start' ? 'Start' : 'Content'}</span>
+        <span class="sec-controls">
+          <button type="button" data-action="move-up" data-sec="${section.id}" ${disableUp ? 'disabled' : ''}>↑</button>
+          <button type="button" data-action="move-down" data-sec="${section.id}" ${disableDown ? 'disabled' : ''}>↓</button>
+          <button type="button" data-action="toggle-collapse" data-sec="${section.id}">${section.collapsed ? 'Expand' : 'Collapse'}</button>
+          <button type="button" class="btn-delete" data-action="remove-section" data-sec="${section.id}">Delete</button>
+        </span>
+      </div>
+      <div class="section-body">${fieldsHtml}</div>
+    </div>`;
+  }
+
+  function vText(val, placeholder) {
+    return val ? esc(val) : `<span class="vp-empty">${esc(placeholder)}</span>`;
+  }
+
+  function placeholderBox(samId, ratio, dataUrl) {
+    if (dataUrl) {
+      return `<div class="vp-ph" style="aspect-ratio:${ratio};background-image:url('${dataUrl}');background-size:cover;background-position:center;">${samId ? `<span class="vp-ph-tag">${esc(samId)}</span>` : ''}</div>`;
+    }
+    return `<div class="vp-ph" style="aspect-ratio:${ratio}">${samId ? `<span class="vp-ph-tag">${esc(samId)}</span>` : `<span class="vp-ph-tag vp-ph-tag-muted">image</span>`}</div>`;
+  }
+
+  function heroBgStyle(dataUrl) {
+    return dataUrl ? ` style="background-image:url('${dataUrl}');background-size:cover;background-position:center;"` : '';
+  }
+
+  function extractYoutubeId(input) {
+    if (!input) return '';
+    const trimmed = input.trim();
+    const match = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+    if (match) return match[1];
+    return /^[\w-]{11}$/.test(trimmed) ? trimmed : '';
+  }
+
+  function teaserRow(title, items, opts) {
+    const grid = opts && opts.grid;
+    const cardsHtml = items.length ? items.map(it => {
+      const bg = it.samIdDataUrl ? ` style="background-image:url('${it.samIdDataUrl}');background-size:cover;background-position:center;"` : '';
+      const sub = it.price || it.date;
+      return `<div class="vp-card"${bg}><div class="vp-card-content"><div class="vp-card-title">${esc(it.title || 'Untitled')}</div>${sub ? `<div class="vp-card-sub">${esc(sub)}</div>` : ''}</div></div>`;
+    }).join('') : `<span class="vp-empty">No items added</span>`;
+    return `<div class="vp-block-title">${vText(title, 'Section title')}</div><div class="${grid ? 'vp-grid' : 'vp-slider'}">${cardsHtml}</div>`;
+  }
+
+  const visualRenderers = {
+    'stage-title': d => `<div class="vp-hero"${heroBgStyle(d.samIdDataUrl)}><div class="vp-hero-content"><h4>${vText(d.title, 'Stage title')}</h4><p>${vText(d.subtitle, 'Subtitle text')}</p>${d.buttonText ? `<span class="vp-btn">${esc(d.buttonText)}</span>` : ''}</div></div>`,
+    'stage-header': d => {
+      const isVideo = d.backgroundType === 'Video';
+      let bgStyle, badge;
+      if (isVideo) {
+        const videoId = extractYoutubeId(d.youtubeUrl);
+        bgStyle = videoId ? ` style="background-image:url('https://img.youtube.com/vi/${videoId}/hqdefault.jpg');background-size:cover;background-position:center;"` : '';
+        badge = `<span class="vp-stagehero-imgtag">▶ YouTube${videoId ? '' : ' (no URL set)'}</span>`;
+      } else {
+        bgStyle = heroBgStyle(d.samIdDataUrl);
+        badge = d.samId ? `<span class="vp-stagehero-imgtag">${esc(d.samId)}</span>` : (d.samIdDataUrl ? '' : `<span class="vp-stagehero-imgtag vp-stagehero-imgtag-muted">image</span>`);
+      }
+      return `<div class="vp-stagehero"${bgStyle}>
+        ${badge}
+        <div class="vp-stagehero-title"><h1>${vText(d.title, 'Stage header title')}</h1></div>
+        ${d.locationName ? `<div class="vp-stagehero-location"><strong>${esc(d.locationName)}</strong></div>` : ''}
+      </div>`;
+    },
+    'sub-menu': () => {
+      const titles = state.sections.filter(s => s.type === 'section-title' && s.data.title).map(s => s.data.title);
+      return `<div class="vp-submenu">${titles.length ? titles.map(c => `<span class="vp-pill">${esc(c)}</span>`).join('') : '<span class="vp-empty">No Section Title added yet</span>'}</div>`;
+    },
+    'leadtext': d => {
+      const hasTeaser = !!(d.teaserSamId || d.teaserSamIdDataUrl);
+      const hasSponsor = !!(d.sponsorSamId || d.sponsorSamIdDataUrl);
+      const sponsor = hasSponsor ? `<div class="vp-sponsor">Presented by ${d.sponsorSamIdDataUrl ? `<img src="${d.sponsorSamIdDataUrl}" alt="">` : `<span class="vp-ph-tag" style="position:static">${esc(d.sponsorSamId)}</span>`}</div>` : '';
+      const leftCol = `<div><p class="vp-lead">${vText(d.text, 'Lead text goes here…')}</p>${sponsor}</div>`;
+      if (!hasTeaser) return leftCol;
+      const teaser = `<div>${placeholderBox(d.teaserSamId, '1/1', d.teaserSamIdDataUrl)}${d.teaserSubtitle ? `<div class="vp-lead-teaser-sub">${esc(d.teaserSubtitle)}</div>` : ''}${d.teaserIntro ? `<div class="vp-lead-teaser-title">${esc(d.teaserIntro)}</div>` : ''}${d.teaserLink ? `<span class="vp-link">${esc(d.teaserLink)} →</span>` : ''}</div>`;
+      return `<div class="vp-two-col" style="align-items:flex-start">${leftCol}${teaser}</div>`;
+    },
+    'section-title': d => `<div><div class="vp-section-title-row"><h4>${vText(d.title, 'Section title')}</h4>${d.linkLabel ? `<span class="vp-link">${esc(d.linkLabel)} →</span>` : ''}</div>${d.text ? `<p class="vp-section-title-sub">${esc(d.text)}</p>` : ''}</div>`,
+    'grid-teaser-slider': d => teaserRow(d.title, d.items || []),
+    'image-gallery-video': d => {
+      let media;
+      if (d.mediaType === 'Video') {
+        const videoId = extractYoutubeId(d.youtubeUrl);
+        media = videoId
+          ? `<div class="vp-ph vp-video" style="aspect-ratio:16/9;background-image:url('https://img.youtube.com/vi/${videoId}/hqdefault.jpg');"><span class="vp-play">▶</span></div>`
+          : `<div class="vp-ph vp-video" style="aspect-ratio:16/9"><span class="vp-ph-tag vp-ph-tag-muted">no YouTube URL set</span></div>`;
+      } else if (d.mediaType === 'Gallery') {
+        const images = d.images || [];
+        media = images.length
+          ? `<div class="vp-gallery">${images.map(it => placeholderBox(it.samId, '4/3', it.samIdDataUrl)).join('')}</div>`
+          : `<div class="vp-gallery">${placeholderBox('', '4/3')}${placeholderBox('', '4/3')}${placeholderBox('', '4/3')}</div>`;
+      } else {
+        media = placeholderBox(d.samId, '16/9', d.samIdDataUrl);
+      }
+      const count = d.mediaType === 'Gallery' ? ` (${(d.images || []).length} images)` : '';
+      return `<div>${media}<div class="vp-media-type">${({Image:'🖼️',Gallery:'🖼️🖼️',Video:'🎬'})[d.mediaType] || '📷'} ${esc(d.mediaType || 'Image')}${count}</div>${d.caption && d.mediaType !== 'Video' ? `<div class="vp-caption">${esc(d.caption)}</div>` : ''}</div>`;
+    },
+    'media-100': d => `<div>${placeholderBox(d.samId, '21/9', d.samIdDataUrl)}${d.caption ? `<div class="vp-caption">${esc(d.caption)}</div>` : ''}</div>`,
+    'recommendation-teaser': d => {
+      const items = d.items || [];
+      const cards = items.map(it => `<div class="vp-rec-card">${placeholderBox(it.samId, '16/9', it.samIdDataUrl)}<h4>${vText(it.title, 'Title')}</h4><p>${vText(it.text, 'Text…')}</p><span class="vp-link">Learn More →</span></div>`).join('');
+      return `${d.title ? `<h3 class="vp-rec-title">${esc(d.title)}</h3>` : ''}${cards ? `<div class="vp-rec-grid">${cards}</div>` : '<span class="vp-empty">No teasers added</span>'}`;
+    },
+    'hero-teaser': d => `<div class="vp-hero"${heroBgStyle(d.samIdDataUrl)}><div class="vp-hero-content"><h4>${vText(d.title, 'Title')}</h4><p>${vText(d.text, 'Text…')}</p>${d.linkLabel ? `<span class="vp-btn">${esc(d.linkLabel)}</span>` : ''}</div></div>`,
+    'image-text-teaser': d => `<div class="vp-two-col" style="flex-direction:${d.layout === 'Image right' ? 'row-reverse' : 'row'}"><div class="vp-two-col-img">${placeholderBox(d.samId, '1/1', d.samIdDataUrl)}</div><div class="vp-two-col-text"><h4>${vText(d.title, 'Title')}</h4><p>${vText(d.text, 'Text…')}</p>${d.linkLabel ? `<span class="vp-link">${esc(d.linkLabel)} →</span>` : ''}</div></div>`,
+    'story-text': d => {
+      const link = d.linkLabel ? `<span class="vp-link">${esc(d.linkLabel)} →</span>` : '';
+      return (d.samId || d.samIdDataUrl)
+        ? `<div class="vp-two-col" style="flex-direction:${d.layout === 'Image right' ? 'row-reverse' : 'row'};align-items:flex-start"><div class="vp-two-col-img" style="flex:0 0 37.5%">${placeholderBox(d.samId, '1/1', d.samIdDataUrl)}</div><div class="vp-two-col-text"><h4>${vText(d.title, 'Story title')}</h4><p>${vText(d.text, 'Story text…')}</p>${link}</div></div>`
+        : `<div class="vp-story"><h4>${vText(d.title, 'Story title')}</h4><p>${vText(d.text, 'Story text…')}</p>${link}</div>`;
+    },
+    'grid-teaser-container': d => {
+      const items = d.items || [];
+      // Two square teasers beside the title, then rows alternate: wide + square, square + wide
+      const cards = items.map((it, i) => {
+        const wide = i >= 2 && [0, 3].includes((i - 2) % 4);
+        const bg = it.samIdDataUrl ? ` style="background-image:url('${it.samIdDataUrl}');"` : '';
+        return `<div class="vp-gtc-card${wide ? ' is-wide' : ''}"${bg}><div class="vp-card-content"><div class="vp-card-title">${esc(it.title || 'Untitled')}</div></div></div>`;
+      }).join('');
+      const head = `<div class="vp-gtc-head"><h4>${vText(d.title, 'Section title')}</h4>${d.linkLabel ? `<span class="vp-link">${esc(d.linkLabel)} →</span>` : ''}</div>`;
+      return `<div class="vp-gtc">${head}${cards || '<span class="vp-empty">No items added</span>'}</div>`;
+    },
+    'offer-teaser-slider': d => {
+      const cards = [1, 2, 3].map(() => `<div class="vp-card"><div class="vp-card-content"><div class="vp-card-sub">${vText(d.location, 'Location')}</div><div class="vp-card-title">Offer</div><div class="vp-card-sub">ab CHF …</div></div></div>`).join('');
+      return `<div class="vp-block-title">${vText(d.title, 'Section title')}</div><div class="vp-slider">${cards}</div><div class="vp-media-type">🎟️ Offers loaded automatically for ${vText(d.location, 'location not set')}</div>`;
+    },
+    'event-teaser-grid': d => {
+      const by = d.filterBy || 'Location';
+      const cards = [1, 2, 3, 4].map(() => `<div class="vp-card"><div class="vp-card-content"><div class="vp-card-title">Event</div><div class="vp-card-sub">${vText(d.filterValue, by)}, dd.mm. – dd.mm.yyyy</div></div></div>`).join('');
+      return `<div class="vp-block-title">${vText(d.title, 'Section title')}</div><div class="vp-grid">${cards}</div><div class="vp-media-type">📅 Events loaded automatically by ${esc(by.toLowerCase())}: ${vText(d.filterValue, 'not set')}</div>`;
+    },
+    'form': d => `<div class="vp-form-box">🧾 <strong>Form</strong><p>${vText(d.note, 'Form fields to be defined in a separate briefing')}</p></div>`,
+    'partner-logos': d => `${d.title ? `<div class="vp-block-title">${esc(d.title)}</div>` : ''}<div class="vp-partners">${(d.items || []).length ? d.items.map(it => `<div class="vp-partner-logo">${it.samIdDataUrl ? `<img src="${it.samIdDataUrl}" alt="">` : esc(it.samId || 'Logo')}</div>`).join('') : '<span class="vp-empty">No logos added</span>'}</div>`
+  };
+
+  function buildVisualSectionHTML(section) {
+    const def = typeDef(section.type);
+    const renderer = visualRenderers[section.type];
+    const inner = renderer ? renderer(section.data) : '<span class="vp-empty">Preview not available</span>';
+    return `<div class="vp-section" data-preview-sec="${section.id}"><div class="vp-tag">${def.icon} ${esc(def.label)}</div>${inner}</div>`;
+  }
+
+  function visualSectionGroups() {
+    const groups = [];
+    for (let i = 0; i < state.sections.length; i++) {
+      if (isHeaderMenuPair(i)) {
+        groups.push([state.sections[i], state.sections[i + 1]]);
+        i++;
+      } else {
+        groups.push([state.sections[i]]);
+      }
+    }
+    return groups;
+  }
+
+  function renderLivePreview() {
+    const panel = document.getElementById('live-preview');
+    if (!panel) return;
+    if (!state.sections.length) {
+      panel.innerHTML = `<div class="vp-empty-state">Your visual preview will appear here as you add sections.</div>`;
+      return;
+    }
+    panel.innerHTML = visualSectionGroups().map(group => {
+      const inner = group.map(buildVisualSectionHTML).join('');
+      return group.length > 1 ? `<div class="vp-header-block">${inner}</div>` : inner;
+    }).join('');
+  }
+
+  function renderCanvas() {
+    if (!state.sections.length) {
+      canvasEl.innerHTML = `<div class="empty-hint">No sections yet — click a tile on the left to start building your page.</div>`;
+    } else {
+      canvasEl.innerHTML = state.sections.map((s, i) => buildSectionCardHTML(s, i, state.sections.length)).join('');
+    }
+    countEl.textContent = state.sections.length + (state.sections.length === 1 ? ' section' : ' sections');
+    saveState();
+  }
+
+  function makeSection(key) {
+    const def = typeDef(key);
+    const data = {};
+    def.fields.forEach(f => { if (f.key) data[f.key] = f.type === 'list' ? [] : (f.default !== undefined ? f.default : (f.type === 'select' && !f.allowEmpty ? f.options[0] : '')); });
+    return { id: uid(), type: key, data, collapsed: false };
+  }
+
+  function pinSubmenuUnderHeader() {
+    const menus = state.sections.filter(s => s.type === 'sub-menu');
+    if (!menus.length) return;
+    state.sections = state.sections.filter(s => s.type !== 'sub-menu');
+    const headerIdx = state.sections.findIndex(s => s.type === 'stage-header');
+    state.sections.splice(headerIdx === -1 ? 0 : headerIdx + 1, 0, menus[0]);
+  }
+
+  function addSection(key) {
+    if (key === 'sub-menu' && state.sections.some(s => s.type === 'sub-menu')) {
+      pinSubmenuUnderHeader();
+      renderCanvas();
+      return;
+    }
+    const section = makeSection(key);
+    if (key === 'sub-menu') {
+      const headerIdx = state.sections.findIndex(s => s.type === 'stage-header');
+      state.sections.splice(headerIdx === -1 ? 0 : headerIdx + 1, 0, section);
+    } else {
+      state.sections.push(section);
+      pinSubmenuUnderHeader();
+    }
+    renderCanvas();
+  }
+
+  canvasEl.addEventListener('input', e => {
+    const t = e.target;
+    const secId = t.dataset.sec;
+    if (!secId) return;
+    const section = state.sections.find(s => s.id === secId);
+    if (!section) return;
+    const fieldKey = t.dataset.field;
+    if (t.dataset.itemfield) {
+      const item = section.data[fieldKey].find(i => i.id === t.dataset.item);
+      if (item) item[t.dataset.itemfield] = t.value;
+    } else {
+      section.data[fieldKey] = t.value;
+    }
+    if (t.maxLength >= 0 || t.minLength >= 0) {
+      const counterEl = t.closest('.field').querySelector('.field-counter');
+      if (counterEl) {
+        if (t.maxLength >= 0) {
+          counterEl.textContent = `${t.value.length}/${t.maxLength}`;
+        } else {
+          counterEl.textContent = `${t.value.length}/${t.minLength} min`;
+          counterEl.classList.toggle('is-under', t.value.length < t.minLength);
+        }
+      }
+    }
+    saveState();
+  });
+
+  canvasEl.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const secId = btn.dataset.sec;
+    const idx = state.sections.findIndex(s => s.id === secId);
+    if (idx === -1) return;
+
+    if (action === 'remove-section') {
+      if (confirm('Remove this section?')) { state.sections.splice(idx, 1); renderCanvas(); }
+    } else if (action === 'move-up' && idx > 0 && !isMenuLockedUnderHeader(idx)) {
+      if (isHeaderMenuPair(idx)) {
+        const [above] = state.sections.splice(idx - 1, 1);
+        state.sections.splice(idx + 1, 0, above);
+      } else {
+        [state.sections[idx - 1], state.sections[idx]] = [state.sections[idx], state.sections[idx - 1]];
+        pinSubmenuUnderHeader();
+      }
+      renderCanvas();
+    } else if (action === 'move-down' && idx < state.sections.length - 1 && !isMenuLockedUnderHeader(idx)) {
+      if (isHeaderMenuPair(idx)) {
+        if (idx + 2 >= state.sections.length) return;
+        const [below] = state.sections.splice(idx + 2, 1);
+        state.sections.splice(idx, 0, below);
+      } else {
+        [state.sections[idx + 1], state.sections[idx]] = [state.sections[idx], state.sections[idx + 1]];
+        pinSubmenuUnderHeader();
+      }
+      renderCanvas();
+    } else if (action === 'toggle-collapse') {
+      state.sections[idx].collapsed = !state.sections[idx].collapsed;
+      renderCanvas();
+    } else if (action === 'add-item') {
+      const fieldKey = btn.dataset.field;
+      const fieldDef = typeDef(state.sections[idx].type).fields.find(f => f.key === fieldKey);
+      const newItem = { id: uid() };
+      fieldDef.itemFields.forEach(f => newItem[f.key] = '');
+      if (!Array.isArray(state.sections[idx].data[fieldKey])) state.sections[idx].data[fieldKey] = [];
+      state.sections[idx].data[fieldKey].push(newItem);
+      renderCanvas();
+    } else if (action === 'remove-item') {
+      const fieldKey = btn.dataset.field;
+      const itemId = btn.dataset.item;
+      state.sections[idx].data[fieldKey] = state.sections[idx].data[fieldKey].filter(i => i.id !== itemId);
+      renderCanvas();
+    } else if (action === 'remove-image') {
+      const fieldKey = btn.dataset.field;
+      const itemId = btn.dataset.item;
+      if (itemId) {
+        const item = state.sections[idx].data[fieldKey].find(i => i.id === itemId);
+        if (item) delete item[btn.dataset.itemfield + 'DataUrl'];
+      } else {
+        delete state.sections[idx].data[fieldKey + 'DataUrl'];
+      }
+      renderCanvas();
+    }
+  });
+
+  canvasEl.addEventListener('change', e => {
+    const input = e.target;
+    if (input.tagName === 'SELECT' && input.dataset.sec) {
+      const def = typeDef(state.sections.find(s => s.id === input.dataset.sec).type);
+      if (def.fields.some(f => f.showIf)) renderCanvas();
+      return;
+    }
+    if (input.type !== 'file' || !input.dataset.uploadSec) return;
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const section = state.sections.find(s => s.id === input.dataset.uploadSec);
+    if (!section) return;
+    const fieldKey = input.dataset.uploadField;
+    const itemId = input.dataset.uploadItem;
+    const itemFieldKey = input.dataset.uploadItemfield;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (itemId) {
+        const item = section.data[fieldKey].find(i => i.id === itemId);
+        if (item) item[itemFieldKey + 'DataUrl'] = reader.result;
+      } else {
+        section.data[fieldKey + 'DataUrl'] = reader.result;
+      }
+      renderCanvas();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function flashHighlight(el, cls) {
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), 1200);
+  }
+
+  canvasEl.addEventListener('click', e => {
+    const head = e.target.closest('.section-head');
+    if (!head || e.target.closest('.sec-controls')) return;
+    const card = head.closest('.section-card');
+    flashHighlight(document.querySelector(`#live-preview [data-preview-sec="${card.dataset.secId}"]`), 'vp-highlight');
+  });
+
+  document.getElementById('live-preview').addEventListener('click', e => {
+    const sec = e.target.closest('[data-preview-sec]');
+    if (!sec) return;
+    flashHighlight(document.querySelector(`.section-card[data-sec-id="${sec.dataset.previewSec}"]`), 'sec-highlight');
+  });
+
+  const paletteStart = document.getElementById('palette-start');
+  const paletteContent = document.getElementById('palette-content');
+  function renderPalette() {
+    paletteStart.innerHTML = sectionTypes.filter(t => t.group === 'start').map(t =>
+      `<button type="button" class="tile" data-type="${t.key}"><span class="tile-icon">${t.icon}</span><span class="tile-label">${esc(t.label)}</span></button>`
+    ).join('');
+    paletteContent.innerHTML = sectionTypes.filter(t => t.group === 'content').map(t =>
+      `<button type="button" class="tile" data-type="${t.key}"><span class="tile-icon">${t.icon}</span><span class="tile-label">${esc(t.label)}</span></button>`
+    ).join('');
+  }
+  [paletteStart, paletteContent].forEach(el => el.addEventListener('click', e => {
+    const tile = e.target.closest('[data-type]');
+    if (tile) addSection(tile.dataset.type);
+  }));
+
+  const metaFields = { golive: 'meta-golive', offline: 'meta-offline', languages: 'meta-languages', markets: 'meta-markets', redirect: 'meta-redirect' };
+  function initMeta() {
+    Object.entries(metaFields).forEach(([key, id]) => {
+      const el = document.getElementById(id);
+      el.value = state.meta[key] || '';
+      el.addEventListener('input', () => { state.meta[key] = el.value; saveState(); });
+    });
+  }
+
+  function buildPreviewHTML() {
+    let html = `<h1>Briefing form for landing page</h1>
+      <table class="pv-meta">
+        <tr><th>Golive date</th><td>${esc(state.meta.golive)}</td><th>Offline date</th><td>${esc(state.meta.offline)}</td></tr>
+        <tr><th>Additional languages</th><td>${esc(state.meta.languages)}</td><th>Markets</th><td>${esc(state.meta.markets)}</td></tr>
+        <tr><th>Redirect</th><td colspan="3">${esc(state.meta.redirect)}</td></tr>
+      </table>
+      <h2>Sections (${state.sections.length})</h2>`;
+    if (!state.sections.length) {
+      html += `<p class="pv-empty">No sections added yet.</p>`;
+    } else {
+      html += visualSectionGroups().map(group => `<div class="pv-block"><div class="pv-visual${group.length > 1 ? ' vp-header-block' : ''}">${group.map(buildVisualSectionHTML).join('')}</div></div>`).join('');
+    }
+    return html;
+  }
+
+  function exportObject() {
+    const menuItems = state.sections.filter(s => s.type === 'section-title' && s.data.title).map(s => s.data.title);
+    return {
+      meta: state.meta,
+      sections: state.sections.map(s => ({
+        type: s.type,
+        label: typeDef(s.type).label,
+        data: s.type === 'sub-menu' ? { generatedItems: menuItems } : s.data
+      }))
+    };
+  }
+
+  const editorView = document.getElementById('editor-view');
+  const previewView = document.getElementById('preview-view');
+  const previewDoc = document.getElementById('preview-doc');
+
+  document.getElementById('btn-preview').addEventListener('click', () => {
+    previewDoc.innerHTML = buildPreviewHTML();
+    editorView.hidden = true;
+    previewView.hidden = false;
+  });
+  document.getElementById('btn-back').addEventListener('click', () => {
+    previewView.hidden = true;
+    editorView.hidden = false;
+  });
+  document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+  function downloadJson() {
+    const json = JSON.stringify(exportObject(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const name = (state.meta.redirect || 'briefing').split('/').pop() || 'briefing';
+    a.href = url;
+    a.download = `briefing-${name.replace(/[^a-z0-9-_]+/gi, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    if (confirm('Clear the entire briefing? This cannot be undone.')) {
+      state = defaultState();
+      saveState();
+      initMeta();
+      renderCanvas();
+    }
+  });
+
+  renderPalette();
+  initMeta();
+  pinSubmenuUnderHeader();
+  renderCanvas();
+</script>
+</body>
+</html>
