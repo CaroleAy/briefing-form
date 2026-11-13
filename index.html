@@ -29,7 +29,7 @@
     position: sticky;
     top: 0;
   }
-  .canvas-wrap { flex: 1; padding: 24px 32px; max-width: 1500px; }
+  .canvas-wrap { flex: 1; min-width: 0; padding: 24px 32px; max-width: 1500px; }
 
   .brand { margin-bottom: 18px; }
   .brand h1 { font-size: 1.05rem; color: #db001c; letter-spacing: -0.2px; }
@@ -124,7 +124,7 @@
   .workspace { display: flex; gap: 20px; align-items: flex-start; }
 
   /* ── Canvas / section cards ── */
-  .canvas { flex: 1 1 440px; display: flex; flex-direction: column; gap: 14px; }
+  .canvas { flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
   .section-head { cursor: pointer; }
 
   /* ── Live visual preview panel ── */
@@ -232,7 +232,8 @@
 
 
   .vp-form-box { border: 1.5px dashed #d5d3cd; border-radius: 10px; padding: 14px; font-size: 0.85rem; color: #55554f; }
-  .vp-form-box p { margin-top: 4px; }
+  .vp-form-answer { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .vp-form-radio { width: 14px; height: 14px; flex-shrink: 0; border: 1.5px solid #9b9b9b; border-radius: 50%; }
 
   .vp-partners { display: flex; gap: 10px; flex-wrap: wrap; }
   .vp-partner-logo { background: #eee; border-radius: 8px; width: 120px; height: 60px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 6px; font-size: 0.75rem; color: #9b9b9b; text-align: center; }
@@ -389,7 +390,6 @@
         <li>Click a section tile below to add it to your page, in the order it should appear.</li>
         <li>Fill in the fields shown for each section (titles, texts, links, SAM/image IDs).</li>
         <li>Reorder or remove sections at any time with the ↑ ↓ and Delete controls.</li>
-        <li>Forms need a separate briefing — only describe the desired fields here.</li>
         <li>When done, use Preview to review, then Save as PDF for the ticket.</li>
       </ul>
     </details>
@@ -559,7 +559,10 @@
         {type:'info', text:'Events are not selected manually — they are loaded automatically based on the location or category entered.'}
     ]},
     { key:'form', group:'content', label:'Form', icon:'🧾', fields:[
-        {key:'note', label:'Describe desired form fields (separate briefing required)', type:'textarea'}
+        {key:'question', label:'Question', type:'text', required:true},
+        {key:'answer1', label:'Answer 1', type:'text', required:true},
+        {key:'answer2', label:'Answer 2', type:'text', required:true},
+        {key:'answer3', label:'Answer 3', type:'text', required:true}
     ]},
     { key:'partner-logos', group:'content', label:'Partner Logos', icon:'🤝', fields:[
         {key:'title', label:'Title (optional)', type:'text'},
@@ -830,7 +833,7 @@
       const cards = [1, 2, 3, 4].map(() => `<div class="vp-card"><div class="vp-card-content"><div class="vp-card-title">Event</div><div class="vp-card-sub">${vText(d.filterValue, by)}, dd.mm. – dd.mm.yyyy</div></div></div>`).join('');
       return `<div class="vp-block-title">${vText(d.title, 'Section title')}</div><div class="vp-grid">${cards}</div><div class="vp-media-type">📅 Events loaded automatically by ${esc(by.toLowerCase())}: ${vText(d.filterValue, 'not set')}</div>`;
     },
-    'form': d => `<div class="vp-form-box">🧾 <strong>Form</strong><p>${vText(d.note, 'Form fields to be defined in a separate briefing')}</p></div>`,
+    'form': d => `<div class="vp-form-box"><strong>${vText(d.question, 'Question')}</strong>${['answer1','answer2','answer3'].map((k, i) => `<label class="vp-form-answer"><span class="vp-form-radio"></span>${vText(d[k], 'Answer ' + (i + 1))}</label>`).join('')}</div>`,
     'partner-logos': d => `${d.title ? `<div class="vp-block-title">${esc(d.title)}</div>` : ''}<div class="vp-partners">${(d.items || []).length ? d.items.map(it => `<div class="vp-partner-logo">${it.samIdDataUrl ? `<img src="${it.samIdDataUrl}" alt="">` : esc(it.samId || 'Logo')}</div>`).join('') : '<span class="vp-empty">No logos added</span>'}</div>`
   };
 
